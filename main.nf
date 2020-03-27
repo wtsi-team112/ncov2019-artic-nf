@@ -15,7 +15,7 @@ workflow {
    runDirectory = "${params.directory}"
    if ( params.illumina ) {
        if (params.cram) {
-        Channel.fromPath( "${runDirectory}*.cram" )
+        Channel.fromPath( "${runDirectory}/*.cram" )
               .set{ ch_cramDirectory }
        }
        else {
