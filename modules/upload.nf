@@ -1,6 +1,8 @@
 process collateSamples {
     tag { sampleName }
 
+    publishDir "${params.outdir}/qc_pass_climb_upload/${params.prefix}", pattern: "${sampleName}", mode: 'copy'
+
     input:
     tuple(sampleName, path(bam), path(fasta))
 
@@ -14,17 +16,33 @@ process collateSamples {
     """
 }
 
-process uploadToCLIMB {
-    tag { params.runPrefix }
+process prepareUploadDirectory {
+    tag { params.prefix }
 
     input:
-    tuple(path(sshkey), path("${params.runPrefix}/*"))
+    path("${params.prefix}/*")
+
+    output:
+    path("${params.prefix}")
+
+    script:
+    """
+    echo "dummy" > dummyfile
+    """
+}
+
+
+process uploadToCLIMB {
+    tag { params.prefix }
+
+    input:
+    tuple(path(sshkey), path(uploadDir))
 
     output:
 
     script:
     """
-    echo "rsync -Lav -e "ssh -i ${sshkey} -l ${params.CLIMBUser}" ${params.runPrefix} ${params.CLIMBHostname}:upload/"
+    rsync -Lav -e "ssh -i ${sshkey} -l ${params.CLIMBUser}" ${uploadDir} ${params.CLIMBHostname}:upload/
     """
 }
 

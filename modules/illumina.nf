@@ -19,7 +19,7 @@ process readTrimming {
 
     script:
     """
-    if [[ \$(zcat ${forward} | head -n4 | wc -l) -eq 0 ]]; then
+    if [[ \$(gunzip -c ${forward} | head -n4 | wc -l) -eq 0 ]]; then
       exit 0
     else
       trim_galore --paired $forward $reverse
@@ -96,13 +96,14 @@ process trimPrimerSequences {
 
     tag { sampleName }
 
-    publishDir "${params.outdir}/climb_upload/${params.runPrefix}/${sampleName}", pattern: "${sampleName}.mapped.bam", mode: 'copy'
+    publishDir "${params.outdir}/${task.process.replaceAll(":","_")}", pattern: "${sampleName}.mapped.bam", mode: 'copy'
+    publishDir "${params.outdir}/${task.process.replaceAll(":","_")}", pattern: "${sampleName}.mapped.primertrimmed.sorted.bam", mode: 'copy'
 
     input:
     tuple(path(bedfile), sampleName, path(ref), path(bam))
 
     output:
-    path "${sampleName}.mapped.bam", emit: mapped
+    tuple sampleName, path("${sampleName}.mapped.bam"), emit: mapped
     tuple sampleName, path("${sampleName}.mapped.primertrimmed.sorted.bam" ), emit: ptrim
 
     script:
@@ -114,8 +115,27 @@ process trimPrimerSequences {
         """
         samtools view -F4 -o ${sampleName}.mapped.bam ${bam}
         samtools index ${sampleName}.mapped.bam
-        ${ivarCmd} -i ${sampleName}.mapped.bam -b ${bedfile} ${params.illuminaKeepLen} -q ${params.illuminaQualThreshold} -p ivar.out
+        ${ivarCmd} -i ${sampleName}.mapped.bam -b ${bedfile} -m ${params.illuminaKeepLen} -q ${params.illuminaQualThreshold} -p ivar.out
         samtools sort -o ${sampleName}.mapped.primertrimmed.sorted.bam ivar.out.bam
+        """
+}
+
+process callVariants {
+
+    tag { sampleName }
+
+    publishDir "${params.outdir}/${task.process.replaceAll(":","_")}", pattern: "${sampleName}.variants.tsv", mode: 'copy'
+
+    input:
+    tuple(sampleName, path(bam), path(ref))
+
+    output:
+    tuple sampleName, path("${sampleName}.variants.tsv")
+
+    script:
+        """
+        samtools mpileup -A -d 0 --reference ${ref} -B -Q 0 ${bam} |\
+        ivar variants -r ${ref} -m ${params.ivarMinDepth} -p ${sampleName}.variants -q ${params.ivarMinVariantQuality} -t ${params.ivarMinFreqThreshold}
         """
 }
 
@@ -123,7 +143,7 @@ process makeConsensus {
 
     tag { sampleName }
 
-    publishDir "${params.outdir}/climb_upload/${params.runPrefix}/${sampleName}", pattern: "${sampleName}.primertrimmed.consensus.fa", mode: 'copy'
+    publishDir "${params.outdir}/${task.process.replaceAll(":","_")}", pattern: "${sampleName}.primertrimmed.consensus.fa", mode: 'copy'
 
     input:
         tuple(sampleName, path(bam))
