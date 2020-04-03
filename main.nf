@@ -39,7 +39,7 @@ if ( ! params.prefix ) {
 workflow {
    if ( params.illumina ) {
        if (params.cram) {
-        Channel.fromPath( "${runDirectory}/*.cram" )
+        Channel.fromPath( "${params.directory}/**.cram" )
               .set{ ch_cramDirectory }
        }
        else {
