@@ -3,6 +3,8 @@
 from Bio import SeqIO
 import csv
 import subprocess
+import pandas as pd
+import matplotlib.pyplot as plt
 
 """
 This script can incorporate as many QC checks as required
@@ -11,28 +13,58 @@ headed with 'qc_pass' and rows for each sample indcating
 'TRUE' if the overall QC check has passed or 'FALSE' if not.
 """
 
-def collect_covered_pos(bamfile, min_depth):
-    p = subprocess.Popen(['samtools', 'depth', bamfile],
+def make_qc_plot(depth_pos, n_density, samplename, window=200):
+    depth_df = pd.DataFrame( { 'position' : [pos[1] for pos in depth_pos], 'depth' : [dep[2] for dep in depth_pos] } )
+    depth_df['depth_moving_average'] = depth_df.iloc[:,1].rolling(window=window).mean()
+
+    n_df = pd.DataFrame( { 'position' : [pos[0] for pos in n_density], 'n_density' : [dens[1] for dens in n_density] } )
+
+    fig, ax1 = plt.subplots()
+    ax2 = ax1.twinx()
+
+    ax1.set_xlabel('Position')
+
+    ax1.set_ylabel('Depth', color = 'g')
+    ax1.set_ylim(top=10**5, bottom=1)
+    ax1.set_yscale('log')
+    ax1.plot(depth_df['depth_moving_average'], color = 'g')
+
+    ax2.set_ylabel('N density', color = 'r')  
+    ax2.plot(n_df['n_density'], color = 'r')
+    ax2.set_ylim(top=1)
+
+    plt.title(samplename)
+    plt.savefig(samplename + '.depth.png')
+
+def read_depth_file(bamfile):
+    p = subprocess.Popen(['samtools', 'depth', '-a', '-d', '0', bamfile],
                        stdout=subprocess.PIPE)
     out, err = p.communicate()
     counter = 0
+
+    pos_depth = []
     for ln in out.decode('utf-8').split("\n"):
        if ln:
-          contig, pos, depth = ln.split("\t")
-          if int(depth) >= min_depth:
-              counter = counter + 1
+          pos_depth.append(ln.split("\t"))
+    
+    return pos_depth
 
+
+def collect_covered_pos(pos_depth, min_depth):
+    counter = 0
+    for contig, pos,depth in pos_depth:
+        if int(depth) >= min_depth:
+            counter = counter + 1
+    
     return counter
 
 
-def collect_largest_n_gap(fastafile):
-    record = SeqIO.read(fastafile, "fasta")
-
-    n_pos =  [i for i, letter in enumerate(record.seq.lower()) if letter == 'n']
+def collect_largest_n_gap(fasta):
+    n_pos =  [i for i, letter in enumerate(fasta.seq.lower()) if letter == 'n']
 
     n_pos = [0] + n_pos
 
-    n_pos = n_pos + [len(record.seq)] 
+    n_pos = n_pos + [len(fasta.seq)] 
 
     n_gaps = [j-i for i, j in zip(n_pos[:-1], n_pos[1:])]
 
@@ -44,6 +76,21 @@ def get_ref_length(ref):
     record = SeqIO.read(ref, "fasta")
     return len(record.seq)
 
+
+def sliding_window_n_density(sequence, window=10):
+
+    sliding_window_n_density = []
+    for i in range(0, len(sequence.seq), 1):
+        window_mid = i + ( window / 2)
+        window_seq = sequence.seq[i:i+window]
+        n_count = window_seq.lower().count('n')
+        n_density = n_count / window
+
+        sliding_window_n_density.append( [ window_mid, n_density ] )
+
+    return sliding_window_n_density
+
+
 def go(args):
     if args.illumina:
         depth = 10
@@ -51,37 +98,39 @@ def go(args):
         depth = 20
 
     ref_length = get_ref_length(args.ref)
+    depth_pos = read_depth_file(args.bam)
 
-    qc_lines = []
-
-    depth_covered_bases = collect_covered_pos(args.bam, depth)
+    depth_covered_bases = collect_covered_pos(depth_pos, depth)
 
     pct_covered_bases = depth_covered_bases / ref_length * 100
 
-    largest_n_gap = collect_largest_n_gap(args.fasta)
+    fasta = SeqIO.read(args.fasta, "fasta")
 
-    if largest_n_gap >= 10000 or pct_covered_bases > 50.0:
+    largest_n_gap = collect_largest_n_gap(fasta)
+
+    if largest_n_gap >= 10000 or pct_covered_bases > 85.0:
         qc_pass = "TRUE"
        
     else:
         qc_pass = "FALSE"
 
 
-    qc_lines.append({ 'sample_name' : args.sample, 
-                'pct_covered_bases' : pct_covered_bases, 
-                 'longest_no_N_run' : largest_n_gap,
-                             'fasta': args.fasta, 
-                              'bam' : args.bam,
-                          'qc_pass' : qc_pass})
+    qc_line = { 'sample_name' : args.sample, 
+          'pct_covered_bases' : pct_covered_bases, 
+           'longest_no_N_run' : largest_n_gap,
+                       'fasta': args.fasta, 
+                        'bam' : args.bam,
+                    'qc_pass' : qc_pass}
 
 
     with open(args.outfile, 'w') as csvfile:
-        header = qc_lines[0].keys()
+        header = qc_line.keys()
         writer = csv.DictWriter(csvfile, fieldnames=header)
         writer.writeheader()
-        for line in qc_lines:
-            writer.writerow(line)
+        writer.writerow(qc_line)
 
+    n_density = sliding_window_n_density(fasta)
+    make_qc_plot(depth_pos, n_density, args.sample)
 
 def main():
     import argparse
