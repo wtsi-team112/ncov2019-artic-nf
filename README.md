@@ -15,7 +15,13 @@ This Nextflow pipeline automates the ARTIC network [nCoV-2019 novel coronavirus 
 
 #### Quick-start
 ##### Illumina
-`nextflow run connor-lab/ncov2019-artic-nf [-profile conda,singularity,docker,slurm] --illumina --prefix "output_file_prefix" --directory /path/to/reads`
+`nextflow run connor-lab/ncov2019-artic-nf [-profile conda,singularity,docker,slurm,lsf] --illumina --prefix "output_file_prefix" --directory /path/to/fastqs`
+
+You can also use cram file input by passing the `--cram` flag.
+
+For production use at large scale, where you will run the workflow many times, you can avoid cloning the scheme repository, creating an ivar bed file and indexing the reference every time by supplying both `--ivarBed /path/to/ivar-compatible.bed` and `--alignerRefPrefix /path/to/bwa-indexed/ref.fa`.
+
+Alternatively you can avoid just the cloning of the scheme repository to remain on a fixed revision of it over time by passing `--schemeRepoURL /path/to/own/clone/of/github.com/artic-network/artic-ncov2019`. This removes any internet access from the workflow except for the optional upload steps.
 
 ##### Nanopore
 ###### Nanopolish
@@ -31,10 +37,12 @@ An up-to-date version of Nextflow is required because the pipeline is written in
 This repo contains both [Singularity]("https://sylabs.io/guides/3.0/user-guide/index.html") and Dockerfiles. You can build the Singularity containers locally by running `scripts/build_singularity_containers.sh` and use them with `-profile singularity` The containers will be available from Docker/Singularityhub shortly.
 
 #### Conda
-The repo contains a environment.yml files which automatically build the correct conda env if `-profile conda` is specifed in the command. Although you'll need `conda` installed, this is probably the easiest way to run this pipeline.
+The repo contains environment.yml files which automatically build the correct conda env if `-profile conda` is specifed in the command. Although you'll need `conda` installed, this is probably the easiest way to run this pipeline.
+
+`--cache /some/dir` can be specified to have a fixed, shared location to store the conda build for use by multiple runs of the workflow.
 
 #### Executors
-By default, the pipeline just runs on the local machine. You can specify `-profile slurm` to use a SLURM cluster. 
+By default, the pipeline just runs on the local machine. You can specify `-profile slurm` to use a SLURM cluster, or `-profile lsf` to use an LSF cluster. In either case you will need to edit the appropriate .config file in the conf directory to provide local queue names. 
 
 #### Profiles
 You can use multiple profiles at once, separating them with a comma. This is described in the Nextflow [documentation](https://www.nextflow.io/docs/latest/config.html#config-profiles) 
