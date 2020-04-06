@@ -27,27 +27,32 @@ workflow sequenceAnalysis {
       ch_filePairs
 
     main:
+      readTrimming(ch_filePairs)
+
       if (params.schemeRepoURL =~ /^http/) {
         articDownloadScheme()
-        makeIvarBedfile(articDownloadScheme.out.scheme)
-        readTrimming(ch_filePairs)
         readMapping(articDownloadScheme.out.scheme.combine(readTrimming.out))
+        trimPrimerSequences(articDownloadScheme.out.bed.combine(readMapping.out))
+        callVariants(trimPrimerSequences.out.ptrim.combine(articDownloadScheme.out.reffasta))
       } else {
-        localRef = Channel.fromPath("${params.schemeRepoURL}/**/${params.schemeVersion}/*.reference.fasta")
-        makeIvarBedfile(localRef)
-        readTrimming(ch_filePairs)
-        localScheme = Channel.fromPath($params.schemeRepoURL)
+        localScheme = Channel.fromPath(params.schemeRepoURL)
         readMapping(localScheme.combine(readTrimming.out))
+        localBed = Channel.fromPath("${params.schemeRepoURL}/**/${params.schemeVersion}/${params.scheme}.bed")
+        trimPrimerSequences(localBed.combine(readMapping.out))
+        localRef = Channel.fromPath("${params.schemeRepoURL}/**/${params.schemeVersion}/*.reference.fasta")
+        callVariants(trimPrimerSequences.out.ptrim.combine(localRef))
       }
-
-      trimPrimerSequences(makeIvarBedfile.out.combine(readMapping.out))
-
-      callVariants(trimPrimerSequences.out.ptrim.combine(articDownloadScheme.out.reffasta))
 
       makeConsensus(trimPrimerSequences.out.ptrim)
 
-      makeQCCSV(trimPrimerSequences.out.ptrim.join(makeConsensus.out, by: 0)
-                                   .combine(articDownloadScheme.out.reffasta))
+      if (params.schemeRepoURL =~ /^http/) {
+        makeQCCSV(trimPrimerSequences.out.ptrim.join(makeConsensus.out, by: 0)
+                                     .combine(articDownloadScheme.out.reffasta))
+      } else {
+        localRef = Channel.fromPath("${params.schemeRepoURL}/**/${params.schemeVersion}/*.reference.fasta")
+        makeQCCSV(trimPrimerSequences.out.ptrim.join(makeConsensus.out, by: 0)
+                                     .combine(localRef))
+      }
 
       makeQCCSV.out.csv.splitCsv()
                        .unique()
