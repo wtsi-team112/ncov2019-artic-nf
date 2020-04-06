@@ -7,10 +7,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this
 project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [2.0.0] - 2020-27-03
+## [2.0.0] - 2020-04-03
 ### Added
 - Merge API-changing commits from upstream
-  3cd64c19fcea32fef657492c3ae4be60cc1c6b81. Other additions, changes and
+  f0ba0a1493c9571f4eda161ae8d6afe02d0da570. Other additions, changes and
   fixes for this version are all from upstream.
 - New bwa option to use it instead of minimap2 for minION.
 - New bin/qc.py
@@ -47,13 +47,15 @@ project adheres to [Semantic Versioning](http://semver.org/).
 - articMinION process now emits primertrimmed and just mapped bams
   seperately, instead of just sorted bams.
 - ivar 1.1_beta now used instead of 1.0.1.
+- Use 6 column bed file in the scheme repository directly with ivar without
+  any conversion.
 
 ### Fixed
 - No more undefined config variables.
 - ivar cmd line was missing `-m` option, so min length was not being used.
 
 
-## [1.1.0] - 2020-27-03
+## [1.1.0] - 2020-03-27
 ### Added
 - Cram to fastq conversion process, used with new `--cram` flag.
 - LSF support with Sanger-specific conf/lsf.config and new `lsf` profile.
@@ -65,6 +67,6 @@ project adheres to [Semantic Versioning](http://semver.org/).
   https://github.com/artic-network/artic-ncov2019.git
 
 
-## [1.0.0] - 2020-24-03
+## [1.0.0] - 2020-03-24
 ### Added
 - Start of fork, based on upstream b07c4351d3d6f9f73d867f82411148328811179f.
