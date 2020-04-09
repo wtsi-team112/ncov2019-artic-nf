@@ -45,10 +45,10 @@ fi
 
 # test --sanger profile
 mv results results_singularity_profile
-rm -rf work
+rm -rf work && rm -rf .nextflow*
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile sanger,singularity \
-       --directory $PWD/../.github/data/ \
+       --directory $PWD/.github/data/ \
        --illumina \
        --prefix test
 cp .nextflow.log ./artifacts/sanger.profile.nextflow.log
