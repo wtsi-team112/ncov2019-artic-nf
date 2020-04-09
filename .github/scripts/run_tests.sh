@@ -52,7 +52,16 @@ NXF_VER=20.03.0-edge nextflow run ./main.nf \
        --illumina \
        --prefix test
 cp .nextflow.log ./artifacts/sanger.profile.nextflow.log
-
+# check that sanger profile activated 4 cpus on bwa mem:
+find work -name .command.err \
+    | xargs cat | grep '\[main\] CMD: bwa mem -t 4' \
+    && echo "sanger profile: bwa started with 4 cpus" \
+	|| exit 1
+# check that sanger profile activated params.allowNoprimer = false:
+find work -name .command.sh \
+    | xargs cat | grep 'ivar trim -e' \
+    && exit 1 \
+	|| echo "sanger profile: did NOT ran ivar trim -e" 
 
 # test conda profile
 # install Conda environments of the pipeline
