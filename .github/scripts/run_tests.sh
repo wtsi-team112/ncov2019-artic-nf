@@ -46,7 +46,7 @@ fi
 # test --sanger profile
 mv results results_singularity_profile
 rm -rf work && rm -rf .nextflow*
-# there are only available cpus in the github runner execution
+# there are only 2 available cpus in the github runner execution
 sed -i s'/cpus = 4/cpus = 2/'g conf/coguk/sanger.config
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile sanger,singularity \
