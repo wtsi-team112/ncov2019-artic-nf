@@ -1,12 +1,10 @@
 #!/bin/bash
 set -eo pipefail
+export PATH=/opt/conda/bin:$PATH
 
 # write log as github Action artifact
 mkdir artifacts
 echo run tests >> artifacts/test_artifact.log
-
-export PATH=/opt/conda/bin:$PATH
-ls -ltra
 
 # run current pull request code
 singularity --version
@@ -15,6 +13,7 @@ NXF_VER=20.03.0-edge nextflow run ./main.nf \
        --directory $PWD/.github/data/ \
        --illumina \
        --prefix test
+cp .nextflow.log artifacts/
 
 # run upstream connor-lab fork
 git clone https://github.com/connor-lab/ncov2019-artic-nf.git upstream_fork
@@ -25,6 +24,7 @@ NXF_VER=20.03.0-edge nextflow run ./main.nf \
        --directory $PWD/../.github/data/ \
        --illumina \
        --prefix test
+cp .nextflow.log artifacts/upstream.nextflow.log
 cd ..
 
 # exclude files from comparison
@@ -36,11 +36,11 @@ find results ./upstream_fork/results \
 git diff --stat --no-index results ./upstream_fork/results > diffs.txt
 if [ -s diffs.txt ]
 then
-  echo no differences         
-else
-  echo differences found       
+  echo differences found between pull request and upstream fork       
   cp diffs.txt artifacts/  
   exit 1
+else
+  echo no differences found between pull request and upstream fork       
 fi
 
 
