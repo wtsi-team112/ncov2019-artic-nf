@@ -46,6 +46,8 @@ fi
 # test --sanger profile
 mv results results_singularity_profile
 rm -rf work && rm -rf .nextflow*
+# there are only available cpus in the github runner execution
+sed -i s'/cpus = 4/cpus = 2/'g conf/coguk/sanger.config
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile sanger,singularity \
        --directory $PWD/.github/data/ \
@@ -54,7 +56,7 @@ NXF_VER=20.03.0-edge nextflow run ./main.nf \
 cp .nextflow.log ./artifacts/sanger.profile.nextflow.log
 # check that sanger profile activated 4 cpus on bwa mem:
 find work -name .command.err \
-    | xargs cat | grep '\[main\] CMD: bwa mem -t 4' \
+    | xargs cat | grep '\[main\] CMD: bwa mem -t 2' \
     && echo "sanger profile: bwa started with 4 cpus" \
 	|| exit 1
 # check that sanger profile activated params.allowNoprimer = false:
