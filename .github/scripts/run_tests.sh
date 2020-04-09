@@ -43,6 +43,15 @@ else
   echo no differences found between pull request and upstream fork       
 fi
 
+# test --sanger profile
+mv results results_singularity_profile
+rm -rf work
+NXF_VER=20.03.0-edge nextflow run ./main.nf \
+       -profile sanger,singularity \
+       --directory $PWD/../.github/data/ \
+       --illumina \
+       --prefix test
+cp .nextflow.log ./artifacts/sanger.profile.nextflow.log
 
 
 # test conda profile
