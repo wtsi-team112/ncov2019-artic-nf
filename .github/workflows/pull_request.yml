@@ -1,15 +1,33 @@
 on:
   pull_request:
     branches:
-    - develop
-name: Pull Request
+    - master
+name: master Pull Request
 jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Test
-      uses: skx/github-action-tester@master
+    - name: install Singularity
+      run: |
+       bash .github/scripts/install_singularity.sh
+    - name: Build pipeline Singularity containers
+      run: |
+       echo $(which singularity)
+       bash scripts/build_singularity_containers.sh
+    - name: install Conda
+      run: bash .github/scripts/install_conda.sh
+    - name: install Nextflow via Conda
+      run: |
+       export PATH=/opt/conda/bin:$PATH
+       conda install -c bioconda nextflow
+       NXF_VER=20.03.0-edge nextflow -version
+    - name: Run tests
+      run: |
+       echo $(which singularity)
+       bash .github/scripts/run_tests.sh
+    - uses: actions/upload-artifact@v1
       with:
-        script: .github/run_develop_tests.sh
+        name: test_artifacts
+        path: artifacts
