@@ -19,6 +19,8 @@ cp .nextflow.log artifacts/
 git clone https://github.com/wtsi-team112/ncov2019-artic-nf.git previous_release 
 cd previous_release
 git checkout 42a79999f11304671b9d22e4959b0167b2130944 
+# thie github runner only has 2 cpus available, so replace for that commit required:
+sed -i s'/cpus = 4/cpus = 2/'g conf/resources.config
 ln -s ../*.sif ./
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile singularity \
