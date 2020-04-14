@@ -26,5 +26,4 @@ find work -name .command.sh \
 	|| echo "sanger profile: did NOT ran ivar trim -e" 
 
 # clean-up for following tests
-mv results results_sanger_profile
-rm -rf work && rm -rf .nextflow*
+rm -rf results && rm -rf work && rm -rf .nextflow*
