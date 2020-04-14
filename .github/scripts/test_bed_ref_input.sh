@@ -4,8 +4,8 @@ export PATH=/opt/conda/bin:$PATH
 
 echo  test --bed and --ref inputs >> artifacts/test_artifact.log
 
-export REF_FILE=$(find work_singularity_profile | grep -v scheme | grep 'ref.fa$' | head -n1 | xargs readlink | sed s'/ncov2019-artic-nf\/work\//ncov2019-artic-nf\/work_singularity_profile\//'g)
-export BED_FILE=$(find work_singularity_profile | grep -v scheme | grep 'bed$' | head -n1 | xargs readlink | sed s'/ncov2019-artic-nf\/work\//ncov2019-artic-nf\/work_singularity_profile\//'g)
+export REF_FILE=$(find work_singularity_profile | grep -v scheme | grep 'ref.fa$' | xargs readlink | grep ncov2019-artic-nf | head -n1 | sed s'/ncov2019-artic-nf\/work\//ncov2019-artic-nf\/work_singularity_profile\//'g)
+export BED_FILE=$(find work_singularity_profile | grep -v scheme | grep 'bed$' | xargs readlink | grep ncov2019-artic-nf | head -n1 | sed s'/ncov2019-artic-nf\/work\//ncov2019-artic-nf\/work_singularity_profile\//'g)
 echo ref file: $REF_FILE
 echo bed file: $BED_FILE
 
