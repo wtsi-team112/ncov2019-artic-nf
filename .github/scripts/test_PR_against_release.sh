@@ -14,12 +14,15 @@ NXF_VER=20.03.0-edge nextflow run ./main.nf \
        --illumina \
        --prefix test
 cp .nextflow.log artifacts/
+# save work dir and results for following tests
+cp -r results results_singularity_profile
+cp -r work work_singularity_profile
 
 # run tests against previous previous_release to compare outputs 
 git clone https://github.com/wtsi-team112/ncov2019-artic-nf.git previous_release 
 cd previous_release
 git checkout 42a79999f11304671b9d22e4959b0167b2130944 
-# thie github runner only has 2 cpus available, so replace for that commit required:
+# the github runner only has 2 cpus available, so replace for that commit required:
 sed -i s'/cpus = 4/cpus = 2/'g conf/resources.config
 ln -s ../*.sif ./
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
@@ -48,5 +51,4 @@ else
 fi
 
 # clean-up for following tests
-mv results results_singularity_profile
-rm -rf work && rm -rf .nextflow*
+rm -rf previous_release && rm -rf results && rm -rf work && rm -rf .nextflow*
