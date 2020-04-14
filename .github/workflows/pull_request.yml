@@ -23,10 +23,12 @@ jobs:
        export PATH=/opt/conda/bin:$PATH
        conda install -c bioconda nextflow
        NXF_VER=20.03.0-edge nextflow -version
-    - name: Run tests
-      run: |
-       echo $(which singularity)
-       bash .github/scripts/run_tests.sh
+    - name: test PR outputs against previous release
+      run: bash .github/scripts/test_PR_against_release.sh
+    - name: test -profile sanger
+      run: bash .github/scripts/test_sanger_profile.sh
+    - name: test --cache conda environment 
+      run: bash .github/scripts/test_conda_cache.sh
     - uses: actions/upload-artifact@v1
       with:
         name: test_artifacts

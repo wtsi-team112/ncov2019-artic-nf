@@ -14,6 +14,7 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
     git \
     cryptsetup
 
+# check that go is already installed in the github runner machine
 echo $(which go)
 go version
 
