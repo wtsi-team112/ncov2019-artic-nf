@@ -30,7 +30,7 @@ NXF_VER=20.03.0-edge nextflow run ./main.nf \
        --directory $PWD/../.github/data/ \
        --illumina \
        --prefix test
-cp .nextflow.log ../artifacts/upstream.nextflow.log
+cp .nextflow.log ../artifacts/previous_release.nextflow.log
 cd ..
 
 # exclude files from comparison
