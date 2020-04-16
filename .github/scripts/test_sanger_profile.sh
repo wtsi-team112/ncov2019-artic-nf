@@ -8,7 +8,7 @@ sed -i s'/cpus = 4/cpus = 2/'g conf/coguk/sanger.config
 echo run pipeline with sanger profile >> artifacts/test_artifact.log
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile sanger,singularity \
-       --directory $PWD/.github/data/ \
+       --directory $PWD/.github/data/fastqs/ \
        --illumina \
        --prefix test
 cp .nextflow.log ./artifacts/sanger.profile.nextflow.log

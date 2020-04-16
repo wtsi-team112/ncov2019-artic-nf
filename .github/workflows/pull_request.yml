@@ -31,6 +31,8 @@ jobs:
       run: bash .github/scripts/test_conda_cache.sh
     - name: test --bed and --ref input options 
       run: bash .github/scripts/test_bed_ref_input.sh
+    - name: test --cram input together with --bed and --ref
+      run: bash .github/scripts/test_cram_input.sh
     - uses: actions/upload-artifact@v1
       with:
         name: test_artifacts
