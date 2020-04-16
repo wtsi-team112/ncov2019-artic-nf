@@ -12,6 +12,7 @@ NXF_VER=20.03.0-edge nextflow run ./main.nf \
        --illumina \
        --prefix test
 cp .nextflow.log ./artifacts/sanger.profile.nextflow.log
+cp -r results results_sanger_profile
 
 # check that sanger profile activated 4 cpus on bwa mem:
 find work -name .command.err \

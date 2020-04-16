@@ -30,14 +30,14 @@ find work -name .command.sh \
 	|| echo "ran with --cram --bed and --ref: did NOT use git clone" 
 
 echo remove files
-find results results_singularity_profile \
+find results results_sanger_profile \
      -name "test.qc.csv" \
      -o -name "*.fq.gz" \
      -o -name "*.bam" \
      -o -name "scheme" | xargs rm -rf
 # exclude git diff renaming modifications (as the filenames of output sudbirs have an extra prefix when using --cram)
 echo run git diff
-git diff --no-index results results_singularity_profile | \
+git diff --no-index results results_sanger_profile | \
     grep -v 'rename to' | \
     grep -v 'rename from' | \
     grep -v 'similarity index 100%' | \
