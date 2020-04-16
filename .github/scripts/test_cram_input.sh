@@ -10,9 +10,11 @@ echo ref file: $REF_FILE
 echo bed file: $BED_FILE
 
 # run current pull request code
+# --sanger profile: there are only 2 available cpus in the github runner execution
+sed -i s'/cpus = 4/cpus = 2/'g conf/coguk/sanger.config
 singularity --version
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
-       -profile singularity \
+       -profile sanger,singularity \
        --ref $REF_FILE \
        --bed $BED_FILE \
        --cram \
