@@ -10,7 +10,7 @@ echo run in illumina mode with defaults >> artifacts/test_artifact.log
 singularity --version
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile singularity \
-       --directory $PWD/.github/data/ \
+       --directory $PWD/.github/data/fastqs/ \
        --illumina \
        --prefix test
 cp .nextflow.log artifacts/
@@ -27,7 +27,7 @@ sed -i s'/cpus = 4/cpus = 2/'g conf/resources.config
 ln -s ../*.sif ./
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile singularity \
-       --directory $PWD/../.github/data/ \
+       --directory $PWD/../.github/data/fastqs/ \
        --illumina \
        --prefix test
 cp .nextflow.log ../artifacts/previous_release.nextflow.log

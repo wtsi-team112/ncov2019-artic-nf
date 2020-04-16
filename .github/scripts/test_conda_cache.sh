@@ -9,7 +9,7 @@ echo run pipeline with conda --cache to create cache >> artifacts/test_artifact.
 NXF_VER=20.03.0-edge nextflow run main.nf \
        -profile conda \
        --cache $PWD/conda_cache_dir \
-       --directory $PWD/.github/data/ \
+       --directory $PWD/.github/data/fastqs/ \
        --illumina \
        --prefix test
 cp .nextflow.log ./artifacts/cache_creation.conda.profile.nextflow.log
@@ -24,7 +24,7 @@ echo re-run pipeline with conda --cache >> artifacts/test_artifact.log
 NXF_VER=20.03.0-edge nextflow run main.nf \
        -profile conda \
        --cache $PWD/conda_cache_dir \
-       --directory $PWD/.github/data/ \
+       --directory $PWD/.github/data/fastqs/ \
        --illumina \
        --prefix test
 cp .nextflow.log ./artifacts/cache_use.conda.profile.nextflow.log
