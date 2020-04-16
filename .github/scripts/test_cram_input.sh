@@ -48,7 +48,7 @@ then
   echo differences found for pull request with or without --cram --ref and --bed
   cp diffs.txt artifacts/diffs_cram_bed_ref.txt
   ## temporary, to fix PR
-  ##exit 1
+  exit 1
 else
   echo no differences found for pull request with or without --cram --ref and --bed 
 fi
