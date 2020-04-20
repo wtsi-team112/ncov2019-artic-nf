@@ -1,7 +1,7 @@
 on:
-  push:
+  pull_request:
     branches:
-    - master_tests
+    - master
 name: master Pull Request
 jobs:
   test:
