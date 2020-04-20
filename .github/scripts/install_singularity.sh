@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eo pipefail
 
+echo Install Singularity dependencies.. >> artifacts/test_artifact.log
 sudo apt-get update
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -y \
     build-essential \
@@ -20,6 +21,7 @@ go version
 
 # install Singularity
 export VERSION=3.5.3
+echo Install Singularity version $VERSION .. >> artifacts/test_artifact.log
 wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-${VERSION}.tar.gz
 tar -xzf singularity-${VERSION}.tar.gz
 cd singularity

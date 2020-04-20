@@ -13,6 +13,7 @@ echo bed file: $BED_FILE
 # --sanger profile: there are only 2 available cpus in the github runner execution
 sed -i s'/cpus = 4/cpus = 2/'g conf/coguk/sanger.config
 singularity --version
+echo Nextflow run --illumina mode with --ref, --bed and --cram.. >> artifacts/test_artifact.log
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile sanger,singularity \
        --ref $REF_FILE \
@@ -26,8 +27,8 @@ cp .nextflow.log artifacts/cram_ref_bed.nextflow.log
 # check that git clone did not ran:
 find work -name .command.sh \
     | xargs cat | grep 'git clone' \
-    && exit 1 \
-	|| echo "ran with --cram --bed and --ref: did NOT use git clone" 
+    && bash -c "echo test failed\: git clone ran and shouldn\'t have with --ref and --bed >> artifacts/test_artifact.log && exit 1"
+echo "ran with --cram --bed and --ref: did NOT use git clone" >> artifacts/test_artifact.log 
 
 echo remove files
 find results results_sanger_profile \
@@ -42,14 +43,16 @@ git diff --no-index results results_sanger_profile | \
     grep -v 'rename from' | \
     grep -v 'similarity index 100%' | \
     grep -v 'diff --git' > diffs.txt || true
+echo Compare outputs of current PR with or without --cram.. >> artifacts/test_artifact.log
 echo compare diffs.txt
 if [ -s diffs.txt ]
 then
-  echo differences found for pull request with or without --cram --ref and --bed
   cp diffs.txt artifacts/diffs_cram_bed_ref.txt
+  echo differences found for pull request with or without --cram >> artifacts/test_artifact.log 
+  echo see diffs_cram_bed_ref.txt >> artifacts/test_artifact.log
   exit 1
 else
-  echo no differences found for pull request with or without --cram --ref and --bed 
+  echo no differences found for pull request with or without --cram >> artifacts/test_artifact.log 
 fi
 
 # clean-up for following tests

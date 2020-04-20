@@ -2,11 +2,10 @@
 set -eo pipefail
 export PATH=/opt/conda/bin:$PATH
 
-# write log as github Action artifact
-echo run in illumina mode with defaults >> artifacts/test_artifact.log
-
 # run current pull request code
 singularity --version
+# write test log as github Action artifact
+echo Nextflow run current PR in --illumina mode.. >> artifacts/test_artifact.log
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile singularity \
        --directory $PWD/.github/data/fastqs/ \
@@ -24,6 +23,7 @@ git checkout 42a79999f11304671b9d22e4959b0167b2130944
 # the github runner only has 2 cpus available, so replace for that commit required:
 sed -i s'/cpus = 4/cpus = 2/'g conf/resources.config
 ln -s ../*.sif ./
+echo Nextflow run previous release in --illumina mode.. >> ../artifacts/test_artifact.log
 NXF_VER=20.03.0-edge nextflow run ./main.nf \
        -profile singularity \
        --directory $PWD/../.github/data/fastqs/ \
@@ -34,6 +34,7 @@ cd ..
 
 # exclude files from comparison
 # and list differences
+echo Compare ouputs of current PR vs those of previous release.. >> artifacts/test_artifact.log
 find results ./previous_release/results \
      -name "test.qc.csv" \
      -o -name "*.fq.gz" \
@@ -42,11 +43,12 @@ find results ./previous_release/results \
 git diff --stat --no-index results ./previous_release/results > diffs.txt
 if [ -s diffs.txt ]
 then
-  echo differences found between pull request and previous release
+  echo "test failed: differences found between PR and previous release" >> artifacts/test_artifact.log
+  echo see diffs.txt >> artifacts/test_artifact.log 
   cp diffs.txt artifacts/  
   exit 1
 else
-  echo no differences found between pull request and previous release
+  echo no differences found between PR and previous release >> artifacts/test_artifact.log
 fi
 
 # clean-up for following tests
