@@ -1,7 +1,8 @@
 #!/bin/bash
 set -eo pipefail
 
-# install Conda
+echo Install Conda .. >> artifacts/test_artifact.log
+
 export PATH=/opt/conda/bin:$PATH
 sudo apt-get update --fix-missing && sudo apt-get install -y wget bzip2 ca-certificates \
     libglib2.0-0 libxext6 libsm6 libxrender1 \
