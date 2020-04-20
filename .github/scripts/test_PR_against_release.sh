@@ -3,7 +3,6 @@ set -eo pipefail
 export PATH=/opt/conda/bin:$PATH
 
 # write log as github Action artifact
-mkdir artifacts
 echo run in illumina mode with defaults >> artifacts/test_artifact.log
 
 # run current pull request code
