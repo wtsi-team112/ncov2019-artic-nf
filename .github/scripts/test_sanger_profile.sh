@@ -18,12 +18,12 @@ cp -r results results_sanger_profile
 find work -name .command.err \
     | xargs cat | grep '\[main\] CMD: bwa mem -t 2' \
     && echo "sanger profile: bwa started with 4 cpus" >> artifacts/test_artifact.log \
-	|| bash -c "test failed\: bwa mem should have used 4 cpus with --sanger profile >> artifacts/test_artifact.log && exit 1"
+	|| bash -c "echo test failed\: bwa mem should have used 4 cpus with --sanger profile >> artifacts/test_artifact.log && exit 1"
 
 # check that sanger profile activated params.allowNoprimer = false:
 find work -name .command.sh \
     | xargs cat | grep 'ivar trim -e' \
-	    && bash -c "test failed\: should not have run \'ivar trim -e\' with --sanger profile >> artifacts/test_artifact.log && exit 1"
+	    && bash -c "echo test failed\: should not have run \'ivar trim -e\' with --sanger profile >> artifacts/test_artifact.log && exit 1"
 echo "sanger profile: did NOT ran ivar trim -e" >> artifacts/test_artifact.log 
 
 # clean-up for following tests
