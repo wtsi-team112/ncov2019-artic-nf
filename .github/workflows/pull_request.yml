@@ -1,7 +1,7 @@
 on:
-  pull_request:
+  push:
     branches:
-    - master
+    - master_tests
 name: master Pull Request
 jobs:
   test:
@@ -34,6 +34,7 @@ jobs:
     - name: test --cram input together with --bed and --ref
       run: bash .github/scripts/test_cram_input.sh
     - uses: actions/upload-artifact@v1
+    if: always()
       with:
         name: test_artifacts
         path: artifacts
