@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+    - name: create artifacts dir to save test logs
+      run: mkdir artifacts
     - name: install Singularity
       run: |
        bash .github/scripts/install_singularity.sh
@@ -33,7 +35,11 @@ jobs:
       run: bash .github/scripts/test_bed_ref_input.sh
     - name: test --cram input together with --bed and --ref
       run: bash .github/scripts/test_cram_input.sh
+    - name: if failure, add latest NF log to artifacts
+      run: mv .nextflow.log artifacts/failure.nextflow.log
+      if: failure()
     - uses: actions/upload-artifact@v1
+      if: always()
       with:
         name: test_artifacts
         path: artifacts
